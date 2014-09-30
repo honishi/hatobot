@@ -1,0 +1,15 @@
+# intellij
+.idea/
+
+# python
+*.pyc
+
+# application
+*.log
+*.out
+
+# config
+main.configuration*
+database.env*
+hatobot.env*
+!*.sample

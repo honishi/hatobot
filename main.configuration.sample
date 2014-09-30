@@ -1,0 +1,69 @@
+[database]
+database_name = hatobot
+username = hatobot
+password = h@t0b0t
+
+[application]
+# interval to fetch data from hatoroda (second)
+polling_interval = 600
+
+# threads within this range are checked for tweet (hour, comments)
+freshness_threshold = 12
+img_count_threshold = 5
+
+[target-any]
+tweet_prefix = 【鳩ろだ】
+# @account
+consumer_key = xxxxx
+consumer_secret = xxxxx
+access_key = xxxxx
+access_secret = xxxxx
+
+[target-kubota]
+keywords = keyword1,keyword2,keyword3
+tweet_prefix = 【鳩ろだ】
+# @account
+consumer_key = xxxxx
+consumer_secret = xxxxx
+access_key = xxxxx
+access_secret = xxxxx
+
+[target-mori]
+keywords = keyword1,keyword2,keyword3
+tweet_prefix = 【鳩ろだ】
+# @account
+consumer_key = xxxxx
+consumer_secret = xxxxx
+access_key = xxxxx
+access_secret = xxxxx
+
+[loggers]
+keys=root
+
+[logger_root]
+level=NOTSET
+handlers=root
+# handlers=stdout
+
+[handlers]
+keys=root,stdout
+
+[handler_root]
+class=handlers.RotatingFileHandler
+level=NOTSET
+formatter=default
+args=(os.getcwd() + "/log/hatobot.log", 'a', (100*1024*1024), 9)
+
+[handler_stdout]
+class=StreamHandler
+level=NOTSET
+formatter=default
+args=(sys.stdout,)
+
+[formatters]
+keys=default
+
+[formatter_default]
+format=[%(asctime)s] [%(levelname)s] [%(threadName)s] %(message)s
+datefmt=
+
