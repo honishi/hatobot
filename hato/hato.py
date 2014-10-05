@@ -23,11 +23,13 @@ USER_AGENT = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36
 
 
 class HatoCore(object):
-    def __init__(self, username, password, database, polling_interval,
-                 freshness_threshold, img_count_threshold, target_configs):
-        if username and password and database and freshness_threshold and img_count_threshold:
-            self.hatodb = HatoDatabase(
-                username, password, database, freshness_threshold, img_count_threshold)
+    def __init__(self, username, password, database, freshness_threshold, img_count_threshold,
+                 polling_interval, target_configs):
+        self.username = username
+        self.password = password
+        self.database = database
+        self.freshness_threshold = freshness_threshold
+        self.img_count_threshold = img_count_threshold
         self.polling_interval = polling_interval
         self.target_configs = target_configs
 
@@ -36,6 +38,9 @@ class HatoCore(object):
         while True:
             try:
                 # raise Exception("dummy exception.")
+                self.hatodb = HatoDatabase(
+                    self.username, self.password, self.database,
+                    self.freshness_threshold, self.img_count_threshold)
                 self.monitor()
             except Exception as error:
                 logging.error("caught exception:{}".format(error))

@@ -4,12 +4,12 @@ username = hatobot
 password = h@t0b0t
 
 [application]
-# interval to fetch data from hatoroda (second)
-polling_interval = 600
-
 # threads within this range are checked for tweet (hour, comments)
 freshness_threshold = 12
 img_count_threshold = 5
+
+# interval to fetch data from hatoroda (second)
+polling_interval = 600
 
 [target-any]
 tweet_prefix = 【鳩ろだ】

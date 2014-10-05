@@ -15,11 +15,11 @@ CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)) + "/main.configuration
 # main sequence
 def main():
     init_logger()
-    (database_name, username, password, polling_interval,
-     freshness_threshold, img_count_threshold, target_configs) = get_configuration()
+    (database_name, username, password, freshness_threshold, img_count_threshold,
+        polling_interval, target_configs) = get_configuration()
 
-    hatocore = hato.HatoCore(username, password, database_name, polling_interval,
-                             freshness_threshold, img_count_threshold, target_configs)
+    hatocore = hato.HatoCore(username, password, database_name, freshness_threshold,
+                             img_count_threshold, polling_interval, target_configs)
     hatocore.start()
 
 
@@ -39,9 +39,9 @@ def get_configuration():
     password = database_section['password']
 
     application_section = config['application']
-    polling_interval = int(application_section['polling_interval'])
     freshness_threshold = int(application_section['freshness_threshold'])
     img_count_threshold = int(application_section['img_count_threshold'])
+    polling_interval = int(application_section['polling_interval'])
 
     target_configs = []
 
@@ -63,8 +63,8 @@ def get_configuration():
 
         target_configs.append(target_config)
 
-    return (database_name, username, password, polling_interval,
-            freshness_threshold, img_count_threshold, target_configs)
+    return (database_name, username, password, freshness_threshold, img_count_threshold,
+            polling_interval, target_configs)
 
 
 def extract_keywords(keywords=None):
