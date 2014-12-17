@@ -176,24 +176,24 @@ class HatoCore(object):
         return trees
 
     def adjust_subject(self, subject, comment):
-        # cleansing subject
-        subject = re.sub("[@＠]", "%", subject)
+        # decode unicode references
+        subject = self.decode_unicode_references(subject)
+        comment = self.decode_unicode_references(comment)
 
+        # cleansing text
+        subject = self.replace_special_characters(subject)
+        comment = self.replace_special_characters(comment)
+
+        # adjust subject
         if subject != "無題":
             return subject
 
-        # cleansing comment
-        comment = re.sub("<br />", "", comment)
-
-        # embedded comment in subject
-        embedded_comment = comment
-
-        if len(embedded_comment) < COMMENT_LENGTH_IN_NO_TITLED_SUBJECT:
+        if len(comment) < COMMENT_LENGTH_IN_NO_TITLED_SUBJECT:
             pass
         else:
-            embedded_comment = comment[0:COMMENT_LENGTH_IN_NO_TITLED_SUBJECT] + "..."
+            comment = comment[0:COMMENT_LENGTH_IN_NO_TITLED_SUBJECT] + "..."
 
-        return subject + " (" + embedded_comment + ")"
+        return subject + " (" + comment + ")"
 
     def tweet(self, tweet_prefix, subject, img_no,
               consumer_key, consumer_secret, access_key, access_secret):
@@ -205,9 +205,27 @@ class HatoCore(object):
         except Exception as error:
             logging.error("caught exception in tweet:{}".format(error))
 
+# miscellaneous utility methods
     def convert_datetime_string(self, string):
         # convert datetime string like '14/10/01(水)13:45:40' to datetime object.
         cleansed = re.sub(r"\(.\)", " ", string)
         datetime_object = datetime.datetime.strptime(cleansed, "%y/%m/%d %H:%M:%S")
 
         return datetime_object
+
+    # based on http://stackoverflow.com/a/1208931
+    def decode_unicode_references(self, string):
+        def _callback(matches):
+            value = int(matches.group(1))
+            try:
+                return chr(value)
+            except:
+                return value
+
+        return re.sub("&#(\d+)(;|(?=\s))", _callback, string)
+
+    def replace_special_characters(self, string):
+        replaced = re.sub("[@＠]", "%", string)
+        replaced = re.sub("<br />", "", replaced)
+
+        return replaced

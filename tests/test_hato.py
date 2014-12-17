@@ -45,3 +45,25 @@ def test_adjust_subject():
     comment = "頑張ってはいるけど需要ないんだよなこの子<br /><br />推すならたわしの方が伸びるよ"
     adjusted = h.adjust_subject(subject, comment)
     assert(adjusted == "無題 (頑張ってはいるけど需要ないんだよなこの子推すならたわしの方が...)")
+
+    # unicode reference
+    subject = "上機嫌(&#9600;&#9600;&#9685;つ&#9685;&#9600;&#9600;)"
+    comment = ""
+    adjusted = h.adjust_subject(subject, comment)
+    assert(adjusted == "上機嫌(▀▀◕つ◕▀▀)")
+
+
+def test_decode_unicode_references():
+    h = hato.HatoCore(None, None, None, None, None, None, None)
+
+    source = "U.S. Adviser&#8217;s Blunt Memo on Iraq: Time &#8216;to Go Home&#8217;"
+    expected = "U.S. Adviser’s Blunt Memo on Iraq: Time ‘to Go Home’"
+    assert(h.decode_unicode_references(source) == expected)
+
+    source = "テスト(&#9600;&#9600;&#9685;つ&#9685;&#9600;&#9600;)テスト"
+    expected = "テスト(▀▀◕つ◕▀▀)テスト"
+    assert(h.decode_unicode_references(source) == expected)
+
+    source = "hello, 世界"
+    expected = "hello, 世界"
+    assert(h.decode_unicode_references(source) == expected)
