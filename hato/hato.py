@@ -97,6 +97,8 @@ class HatoCore(object):
                     access_key = target_config['access_key']
                     access_secret = target_config['access_secret']
 
+                    subject = re.sub("[@＠]", "%", subject)
+
                     self.tweet(tweet_prefix, subject, head_img_no,
                                consumer_key, consumer_secret, access_key, access_secret)
                     self.hatodb.set_tweet_as_completed(target_name, head_img_no)
