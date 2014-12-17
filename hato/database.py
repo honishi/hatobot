@@ -47,7 +47,7 @@ class HatoDatabase(object):
         picked_new_heads = []
         cursor = self.connect.cursor()
 
-        base_query = ("select tree.head_img_no, img.subject"
+        base_query = ("select tree.head_img_no, img.subject, img.comment"
                       " from img force index(idx_date_no_subject), tree"
                       " where"
                       " (now() - interval {} hour) < img.img_date"

@@ -21,6 +21,8 @@ HATORODA_PAGE = HATORODA_BASE + "siokara.php?res="
 USER_AGENT = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36")
 
+COMMENT_LENGTH_IN_NO_TITLED_SUBJECT = 30
+
 
 class HatoCore(object):
     def __init__(self, username, password, database, freshness_threshold, img_count_threshold,
@@ -85,8 +87,8 @@ class HatoCore(object):
             picked_new_heads = self.hatodb.pick_new_head_imgs(keywords)
 
             for new_head in picked_new_heads:
-                (head_img_no, subject) = new_head
-                logging.debug(new_head)
+                (head_img_no, subject, comment) = new_head
+                logging.debug("({},{})".format(head_img_no, subject))
 
                 if not self.hatodb.is_tweeted(target_name, head_img_no):
                     logging.debug("updating twitter status...")
@@ -97,7 +99,7 @@ class HatoCore(object):
                     access_key = target_config['access_key']
                     access_secret = target_config['access_secret']
 
-                    subject = re.sub("[@＠]", "%", subject)
+                    subject = self.adjust_subject(subject, comment)
 
                     self.tweet(tweet_prefix, subject, head_img_no,
                                consumer_key, consumer_secret, access_key, access_secret)
@@ -172,6 +174,26 @@ class HatoCore(object):
             trees.append(tree)
 
         return trees
+
+    def adjust_subject(self, subject, comment):
+        # cleansing subject
+        subject = re.sub("[@＠]", "%", subject)
+
+        if subject != "無題":
+            return subject
+
+        # cleansing comment
+        comment = re.sub("<br />", "", comment)
+
+        # embedded comment in subject
+        embedded_comment = comment
+
+        if len(embedded_comment) < COMMENT_LENGTH_IN_NO_TITLED_SUBJECT:
+            pass
+        else:
+            embedded_comment = comment[0:COMMENT_LENGTH_IN_NO_TITLED_SUBJECT] + "..."
+
+        return subject + " (" + embedded_comment + ")"
 
     def tweet(self, tweet_prefix, subject, img_no,
               consumer_key, consumer_secret, access_key, access_secret):
