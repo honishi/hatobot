@@ -22,14 +22,14 @@ def test_adjust_subject():
 
     # no need to adjust
     subject = "タイトル"
-    comment = "雪と氷の世界・北海道には、この時季ここでしかできないオンリーワンのイベントが盛りだくさん。"
+    comment = "雪と氷の世界・北海道には、この時季ここでしかできないオンリーワンのイベントが盛りだくさん。雪と氷の世界・北海道には、この時季ここでしかできないオンリーワンのイベントが盛りだくさん。"
     adjusted = h.adjust_subject(subject, comment)
     assert(adjusted == "タイトル")
 
     # embedded text
     subject = "無題"
     adjusted = h.adjust_subject(subject, comment)
-    assert(adjusted == "無題 (雪と氷の世界・北海道には、この時季ここでしかできないオンリー...)")
+    assert(adjusted == "無題（雪と氷の世界・北海道には、この時季ここでしかできないオンリーワンのイベントが盛りだくさん。雪と氷の世…）")
 
     # masking twitter mention
     subject = "@abc"
@@ -44,13 +44,29 @@ def test_adjust_subject():
     subject = "無題"
     comment = "頑張ってはいるけど需要ないんだよなこの子<br /><br />推すならたわしの方が伸びるよ"
     adjusted = h.adjust_subject(subject, comment)
-    assert(adjusted == "無題 (頑張ってはいるけど需要ないんだよなこの子推すならたわしの方が...)")
+    assert(adjusted == "無題（頑張ってはいるけど需要ないんだよなこの子推すならたわしの方が伸びるよ）")
 
     # unicode reference
     subject = "上機嫌(&#9600;&#9600;&#9685;つ&#9685;&#9600;&#9600;)"
     comment = ""
     adjusted = h.adjust_subject(subject, comment)
     assert(adjusted == "上機嫌(▀▀◕つ◕▀▀)")
+
+    # url
+    subject = "無題"
+    comment = "つ http://example.com"
+    adjusted = h.adjust_subject(subject, comment)
+    assert(adjusted == "無題（つ ）")
+
+    comment = "http://example.com"
+    adjusted = h.adjust_subject(subject, comment)
+    assert(adjusted == "無題")
+
+    # url regexp bug case
+    subject = "無題"
+    comment = "http://live.nicovideo.jp/watch/lv203762080<br /><br />あのひきこもりちゃんは健在だった！<br />現在とある男性リスナーの家にお泊り中"
+    adjusted = h.adjust_subject(subject, comment)
+    assert(adjusted == "無題（あのひきこもりちゃんは健在だった！現在とある男性リスナーの家にお泊り中）")
 
 
 def test_decode_unicode_references():

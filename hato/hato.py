@@ -21,7 +21,10 @@ HATORODA_PAGE = HATORODA_BASE + "siokara.php?res="
 USER_AGENT = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 "
               "(KHTML, like Gecko) Chrome/37.0.2062.124 Safari/537.36")
 
-COMMENT_LENGTH_IN_NO_TITLED_SUBJECT = 30
+NO_TITLED_SUBJECT = "無題"
+# use '[0-9A-Za-z_]' instead of '\w', cause it matches full-width characters like 'あ'
+REGEXP_URL = r"https?://[0-9A-Za-z_/:%#\$&\?\(\)~\.0=\+\-]+"
+COMMENT_LENGTH_IN_NO_TITLED_SUBJECT = 50
 
 
 class HatoCore(object):
@@ -185,15 +188,15 @@ class HatoCore(object):
         comment = self.replace_special_characters(comment)
 
         # adjust subject
-        if subject != "無題":
+        if subject != NO_TITLED_SUBJECT or (subject == NO_TITLED_SUBJECT and len(comment) == 0):
             return subject
 
         if len(comment) < COMMENT_LENGTH_IN_NO_TITLED_SUBJECT:
             pass
         else:
-            comment = comment[0:COMMENT_LENGTH_IN_NO_TITLED_SUBJECT] + "..."
+            comment = comment[0:COMMENT_LENGTH_IN_NO_TITLED_SUBJECT] + "…"
 
-        return subject + " (" + comment + ")"
+        return subject + "（" + comment + "）"
 
     def tweet(self, tweet_prefix, subject, img_no,
               consumer_key, consumer_secret, access_key, access_secret):
@@ -225,7 +228,8 @@ class HatoCore(object):
         return re.sub("&#(\d+)(;|(?=\s))", _callback, string)
 
     def replace_special_characters(self, string):
-        replaced = re.sub("[@＠]", "%", string)
-        replaced = re.sub("<br />", "", replaced)
+        replaced = re.sub(r"[@＠]", "%", string)
+        replaced = re.sub(r"<br />", "", replaced)
+        replaced = re.sub(REGEXP_URL, "", replaced)
 
         return replaced
