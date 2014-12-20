@@ -13,6 +13,9 @@ from twython import Twython
 from hato.database import HatoDatabase
 from hato.exception import HatoException
 
+DEBUG_DRY_TWEET = False
+# DEBUG_DRY_TWEET = True
+
 HATORODA_BASE = "http://up.subuya.com/"
 HATORODA_TREE = HATORODA_BASE + "tree.cgi"
 HATORODA_IMG = HATORODA_BASE + "img.cgi"
@@ -25,6 +28,8 @@ NO_TITLED_SUBJECT = "無題"
 # use '[0-9A-Za-z_]' instead of '\w', cause it matches full-width characters like 'あ'
 REGEXP_URL = r"https?://[0-9A-Za-z_/:%#\$&\?\(\)~\.0=\+\-]+"
 COMMENT_LENGTH_IN_NO_TITLED_SUBJECT = 50
+
+SLEEP_INTERVAL = 1 if DEBUG_DRY_TWEET else 5
 
 
 class HatoCore(object):
@@ -112,7 +117,7 @@ class HatoCore(object):
                             target_name, head_img_no, img_count_threshold)
 
                         logging.info("updated twitter status.")
-                        time.sleep(5)
+                        time.sleep(SLEEP_INTERVAL)
 
 # internal methods
     def fetch_hatoloda(self, url):
@@ -208,7 +213,8 @@ class HatoCore(object):
 
         try:
             twitter = Twython(consumer_key, consumer_secret, access_key, access_secret)
-            twitter.update_status(status=status)
+            if not DEBUG_DRY_TWEET:
+                twitter.update_status(status=status)
         except Exception as error:
             logging.error("caught exception in tweet:{}".format(error))
 

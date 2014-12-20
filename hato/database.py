@@ -77,9 +77,9 @@ class HatoDatabase(object):
 # tweet status
     def is_tweeted(self, target_name, head_img_no, img_count):
         cursor = self.connect.cursor()
-        cursor.execute("select * from tweet"
-                       " where target_name = %s and img_no = %s and img_count = %s and status = %s",
-                       (target_name, head_img_no, img_count, TWEET_STATUS_COMPLETED))
+        cursor.execute("select * from tweet where"
+                       " target_name = \"{}\" and img_no = {} and img_count = {} and status = {}"
+                       .format(target_name, head_img_no, img_count, TWEET_STATUS_COMPLETED))
         is_tweeted = (0 < cursor.rowcount)
         cursor.close()
 
@@ -90,7 +90,7 @@ class HatoDatabase(object):
 
     def set_tweet(self, target_name, head_img_no, img_count, status):
         cursor = self.connect.cursor()
-        cursor.execute("replace into tweet values(%s, %s, %s, %s, %s)",
-                       (target_name, head_img_no, img_count, status, 0))
+        cursor.execute("replace into tweet values(\"{}\", {}, {}, {}, {})"
+                       .format(target_name, head_img_no, img_count, status, 0))
         self.connect.commit()
         cursor.close()
