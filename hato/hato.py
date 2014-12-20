@@ -28,13 +28,13 @@ COMMENT_LENGTH_IN_NO_TITLED_SUBJECT = 50
 
 
 class HatoCore(object):
-    def __init__(self, username, password, database, freshness_threshold, img_count_threshold,
+    def __init__(self, username, password, database, freshness_threshold, img_count_thresholds,
                  polling_interval, target_configs):
         self.username = username
         self.password = password
         self.database = database
         self.freshness_threshold = freshness_threshold
-        self.img_count_threshold = img_count_threshold
+        self.img_count_thresholds = img_count_thresholds
         self.polling_interval = polling_interval
         self.target_configs = target_configs
 
@@ -43,9 +43,7 @@ class HatoCore(object):
         while True:
             try:
                 # raise Exception("dummy exception.")
-                self.hatodb = HatoDatabase(
-                    self.username, self.password, self.database,
-                    self.freshness_threshold, self.img_count_threshold)
+                self.hatodb = HatoDatabase(self.username, self.password, self.database)
                 self.monitor()
             except Exception as error:
                 logging.error("caught exception:{}".format(error))
@@ -87,29 +85,34 @@ class HatoCore(object):
             keywords = target_config['keywords']
 
             logging.info("target:<{}>".format(target_name))
-            picked_new_heads = self.hatodb.pick_new_head_imgs(keywords)
 
-            for new_head in picked_new_heads:
-                (head_img_no, subject, comment) = new_head
-                logging.debug("({},{})".format(head_img_no, subject))
+            for img_count_threshold in self.img_count_thresholds:
+                logging.info("img_count_threshold:<{}>".format(img_count_threshold))
+                picked_new_heads = self.hatodb.pick_new_head_imgs(
+                    img_count_threshold, self.freshness_threshold, keywords)
 
-                if not self.hatodb.is_tweeted(target_name, head_img_no):
-                    logging.debug("updating twitter status...")
+                for new_head in picked_new_heads:
+                    (head_img_no, subject, comment) = new_head
+                    logging.debug("({},{},{})".format(head_img_no, subject, img_count_threshold))
 
-                    tweet_prefix = target_config['tweet_prefix']
-                    consumer_key = target_config['consumer_key']
-                    consumer_secret = target_config['consumer_secret']
-                    access_key = target_config['access_key']
-                    access_secret = target_config['access_secret']
+                    if not self.hatodb.is_tweeted(target_name, head_img_no, img_count_threshold):
+                        logging.debug("updating twitter status...")
 
-                    subject = self.adjust_subject(subject, comment)
+                        tweet_prefix = target_config['tweet_prefix']
+                        consumer_key = target_config['consumer_key']
+                        consumer_secret = target_config['consumer_secret']
+                        access_key = target_config['access_key']
+                        access_secret = target_config['access_secret']
 
-                    self.tweet(tweet_prefix, subject, head_img_no,
-                               consumer_key, consumer_secret, access_key, access_secret)
-                    self.hatodb.set_tweet_as_completed(target_name, head_img_no)
+                        subject = self.adjust_subject(subject, comment)
 
-                    logging.info("updated twitter status.")
-                    time.sleep(5)
+                        self.tweet(tweet_prefix, subject, head_img_no, img_count_threshold,
+                                   consumer_key, consumer_secret, access_key, access_secret)
+                        self.hatodb.set_tweet_as_completed(
+                            target_name, head_img_no, img_count_threshold)
+
+                        logging.info("updated twitter status.")
+                        time.sleep(5)
 
 # internal methods
     def fetch_hatoloda(self, url):
@@ -198,9 +201,10 @@ class HatoCore(object):
 
         return subject + "（" + comment + "）"
 
-    def tweet(self, tweet_prefix, subject, img_no,
+    def tweet(self, tweet_prefix, subject, img_no, img_count,
               consumer_key, consumer_secret, access_key, access_secret):
-        status = "{}{} {}".format(tweet_prefix, subject, HATORODA_PAGE + str(img_no))
+        status = "{}{} [{}+] {}".format(
+            tweet_prefix, subject, img_count, HATORODA_PAGE + str(img_no))
 
         try:
             twitter = Twython(consumer_key, consumer_secret, access_key, access_secret)

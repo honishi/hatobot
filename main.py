@@ -15,11 +15,11 @@ CONFIG_FILE = os.path.dirname(os.path.realpath(__file__)) + "/main.configuration
 # main sequence
 def main():
     init_logger()
-    (database_name, username, password, freshness_threshold, img_count_threshold,
+    (database_name, username, password, freshness_threshold, img_count_thresholds,
         polling_interval, target_configs) = get_configuration()
 
     hatocore = hato.HatoCore(username, password, database_name, freshness_threshold,
-                             img_count_threshold, polling_interval, target_configs)
+                             img_count_thresholds, polling_interval, target_configs)
     hatocore.start()
 
 
@@ -40,7 +40,7 @@ def get_configuration():
 
     application_section = config['application']
     freshness_threshold = int(application_section['freshness_threshold'])
-    img_count_threshold = int(application_section['img_count_threshold'])
+    img_count_thresholds = extract_img_count_thresholds(application_section['img_count_thresholds'])
     polling_interval = int(application_section['polling_interval'])
 
     target_configs = []
@@ -63,8 +63,17 @@ def get_configuration():
 
         target_configs.append(target_config)
 
-    return (database_name, username, password, freshness_threshold, img_count_threshold,
+    return (database_name, username, password, freshness_threshold, img_count_thresholds,
             polling_interval, target_configs)
+
+
+def extract_img_count_thresholds(img_count_thresholds):
+    thresholds = []
+
+    for threshold in img_count_thresholds.split(','):
+        thresholds.append(int(threshold))
+
+    return thresholds
 
 
 def extract_keywords(keywords=None):

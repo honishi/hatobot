@@ -5,8 +5,8 @@ password = h@t0b0t
 
 [application]
 # threads within this range are checked for tweet (hour, comments)
-freshness_threshold = 12
-img_count_threshold = 5
+freshness_threshold = 24
+img_count_thresholds = 5,50,100,150,200,250
 
 # interval to fetch data from hatoroda (second)
 polling_interval = 600

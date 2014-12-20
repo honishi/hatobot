@@ -30,7 +30,7 @@ img_no int,
 img_count int,
 status int,
 retry_count int default 0,
-primary key (target_name, img_no)
+primary key (target_name, img_no, img_count)
 );
 
 show tables;

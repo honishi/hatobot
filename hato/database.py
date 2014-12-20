@@ -10,11 +10,9 @@ TWEET_STATUS_FAILED = 1
 
 
 class HatoDatabase(object):
-    def __init__(self, username, password, database, freshness_threshold, img_count_threshold):
+    def __init__(self, username, password, database):
         self.connect = pymysql.connect(
             user=username, passwd=password, database=database, charset='utf8')
-        self.freshness_threshold = freshness_threshold
-        self.img_count_threshold = img_count_threshold
 
     def __del__(self):
         self.connect.close()
@@ -40,9 +38,9 @@ class HatoDatabase(object):
         cursor.close()
 
 # new heads picker
-    def pick_new_head_imgs(self, keywords=None):
+    def pick_new_head_imgs(self, img_count, freshness, keywords=None):
         """
-        returns [(head_img_no, subject), ...].
+        returns [(head_img_no, subject, comment), (...), ...].
         """
         picked_new_heads = []
         cursor = self.connect.cursor()
@@ -52,8 +50,8 @@ class HatoDatabase(object):
                       " where"
                       " (now() - interval {} hour) < img.img_date"
                       " and img.img_no = tree.head_img_no"
-                      " and {} < tree.img_count"
-                      .format(self.freshness_threshold, self.img_count_threshold))
+                      " and {} <= tree.img_count"
+                      .format(freshness, img_count))
 
         if keywords is None:
             keywords = [None]
@@ -77,22 +75,22 @@ class HatoDatabase(object):
         return picked_new_heads
 
 # tweet status
-    def is_tweeted(self, target_name, head_img_no):
+    def is_tweeted(self, target_name, head_img_no, img_count):
         cursor = self.connect.cursor()
         cursor.execute("select * from tweet"
-                       " where target_name = %s and img_no = %s and status = %s",
-                       (target_name, head_img_no, TWEET_STATUS_COMPLETED))
+                       " where target_name = %s and img_no = %s and img_count = %s and status = %s",
+                       (target_name, head_img_no, img_count, TWEET_STATUS_COMPLETED))
         is_tweeted = (0 < cursor.rowcount)
         cursor.close()
 
         return is_tweeted
 
-    def set_tweet_as_completed(self, target_name, head_img_no):
-        self.set_tweet(target_name, head_img_no, TWEET_STATUS_COMPLETED)
+    def set_tweet_as_completed(self, target_name, head_img_no, img_count):
+        self.set_tweet(target_name, head_img_no, img_count, TWEET_STATUS_COMPLETED)
 
-    def set_tweet(self, target_name, head_img_no, status):
+    def set_tweet(self, target_name, head_img_no, img_count, status):
         cursor = self.connect.cursor()
         cursor.execute("replace into tweet values(%s, %s, %s, %s, %s)",
-                       (target_name, head_img_no, 0, status, 0))
+                       (target_name, head_img_no, img_count, status, 0))
         self.connect.commit()
         cursor.close()
