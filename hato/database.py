@@ -50,14 +50,14 @@ class HatoDatabase(object):
                       " where"
                       " (now() - interval {} hour) < img.img_date"
                       " and img.img_no = tree.head_img_no"
-                      " and {} <= tree.img_count"
+                      " and {} < tree.img_count"
                       .format(freshness, img_count))
 
         if keywords is None:
             keywords = [None]
 
         for keyword in keywords:
-            logging.debug("keyword:<{}>".format(keyword))
+            # logging.debug("img_count:<{}>, keyword:<{}>".format(img_count, keyword))
 
             query = base_query
             if keyword:

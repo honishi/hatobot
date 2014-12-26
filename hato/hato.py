@@ -92,13 +92,13 @@ class HatoCore(object):
             logging.info("target:<{}>".format(target_name))
 
             for img_count_threshold in self.img_count_thresholds:
-                logging.info("img_count_threshold:<{}>".format(img_count_threshold))
+                # logging.debug("img_count_threshold:<{}>".format(img_count_threshold))
                 picked_new_heads = self.hatodb.pick_new_head_imgs(
                     img_count_threshold, self.freshness_threshold, keywords)
 
                 for new_head in picked_new_heads:
                     (head_img_no, subject, comment) = new_head
-                    logging.debug("({},{},{})".format(head_img_no, subject, img_count_threshold))
+                    logging.debug("({},{},{})".format(img_count_threshold, head_img_no, subject))
 
                     if not self.hatodb.is_tweeted(target_name, head_img_no, img_count_threshold):
                         logging.debug("updating twitter status...")
@@ -208,8 +208,8 @@ class HatoCore(object):
 
     def tweet(self, tweet_prefix, subject, img_no, img_count,
               consumer_key, consumer_secret, access_key, access_secret):
-        status = "{}{} [{}+] {}".format(
-            tweet_prefix, subject, img_count, HATORODA_PAGE + str(img_no))
+        status = "{}{} {} ({}+)".format(
+            tweet_prefix, subject, HATORODA_PAGE + str(img_no), img_count)
 
         try:
             twitter = Twython(consumer_key, consumer_secret, access_key, access_secret)
