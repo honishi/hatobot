@@ -96,6 +96,10 @@ class HatoCore(object):
                 picked_new_heads = self.hatodb.pick_new_head_imgs(
                     img_count_threshold, self.freshness_threshold, keywords)
 
+                if len(picked_new_heads) == 0:
+                    # logging.debug("no picked threads, so break")
+                    break
+
                 for new_head in picked_new_heads:
                     (head_img_no, subject, comment) = new_head
                     logging.debug("({},{},{})".format(img_count_threshold, head_img_no, subject))

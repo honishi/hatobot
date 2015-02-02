@@ -7,7 +7,7 @@ program=${basedir}/main.py
 logfile=${basedir}/log/hatobot.log
 nohupfile=${basedir}/log/nohup.out
 pgrep_target="python ${program}"
-monitor_threshold=$((12*60))
+monitor_threshold=$((6*60))
 customenv=${basedir}/hatobot.env
 
 start() {
