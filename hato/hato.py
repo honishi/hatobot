@@ -224,9 +224,10 @@ class HatoCore(object):
 
 # miscellaneous utility methods
     def convert_datetime_string(self, string):
-        # convert datetime string like '14/10/01(水)13:45:40' to datetime object.
+        # convert datetime string like '14/10/01(水)13:45' or '15/10/01(木)23:47' to datetime object.
         cleansed = re.sub(r"\(.\)", " ", string)
-        datetime_object = datetime.datetime.strptime(cleansed, "%y/%m/%d %H:%M:%S")
+        cleansed = re.sub(r"(.+ \d{2}:\d{2}):\d{2}", "\\1", cleansed)
+        datetime_object = datetime.datetime.strptime(cleansed, "%y/%m/%d %H:%M")
 
         return datetime_object
 
